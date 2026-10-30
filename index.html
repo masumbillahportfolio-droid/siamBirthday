@@ -42,6 +42,23 @@ body.locked{overflow:hidden}
 button{font-family:inherit}
 img{max-width:100%}
 
+/* ============ BACKGROUND VIDEO (behind everything) ============ */
+#bgVideoWrap{
+  position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  background:var(--bg);
+}
+#bgVideoWrap video{
+  width:100%;height:100%;object-fit:cover;display:block;
+  opacity:0;transition:opacity 2.6s ease;
+  filter:brightness(.85) saturate(.92) contrast(1.03);
+}
+#bgVideoWrap.on video{opacity:1}
+#bgVideoWrap .veil{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg, rgba(21,13,16,.88), rgba(24,14,17,.78) 45%, rgba(10,5,7,.94));
+  opacity:var(--veil,.72);
+}
+
 /* ============ SKY / LIGHTING / GRAIN ============ */
 #sky{position:fixed;inset:0;z-index:1;pointer-events:none}
 #vignette{
@@ -486,6 +503,12 @@ section{
 </head>
 <body class="locked">
 
+<!-- ======== BACKGROUND VIDEO (ওয়েবসাইটের পেছনে চলতে থাকা ভিডিও) ======== -->
+<div id="bgVideoWrap" aria-hidden="true">
+  <video id="bgVideo" muted loop playsinline autoplay preload="auto"></video>
+  <div class="veil"></div>
+</div>
+
 <canvas id="sky" aria-hidden="true"></canvas>
 <div id="vignette" aria-hidden="true"></div>
 
@@ -695,7 +718,7 @@ section{
 const CONFIG = {
   name:      'Siam',
   fullName:  'Sammim Ahmed Siam',
-  fromName:  'Masum',
+  fromName:  'Rayhan',
   date:      '4 November 2026',
   mainPhoto: 'https://picsum.photos/seed/siam-bro/720/960.jpg',
   memories: [
@@ -704,6 +727,11 @@ const CONFIG = {
     { src:'https://i.postimg.cc/8C8wm2cc/Whats-App-Image-2026-10-29-at-1-52-12-PM.jpg',  caption:'Growing up, never growing apart. ♥' },
     { src:'https://i.postimg.cc/cCJcJZ9j/Whats-App-Image-2026-10-29-at-1-52-14-PM.jpg',  caption:'Some moments never get old.' },
     { src:'https://i.postimg.cc/4N7z2Wrz/Whats-App-Image-2026-10-29-at-1-52-12-PM-(1).jpg',  caption:'Brothers by heart, friends by choice. ♥' },
+    { src:'https://i.postimg.cc/8C8wm2cc/Whats-App-Image-2026-10-29-at-1-52-12-PM.jpg',  caption:'Brothers by heart, friends by choice. ♥' },
+    { src:'https://i.postimg.cc/pdtPc9bQ/Whats-App-Image-2026-10-29-at-1-52-11-PM.jpg',  caption:'Brothers by heart, friends by choice. ♥' },
+    { src:'https://i.postimg.cc/wBd94t8m/Whats-App-Image-2026-10-29-at-1-52-21-PM.jpg',  caption:'Brothers by heart, friends by choice. ♥' },
+    { src:'https://i.postimg.cc/9fjcg454/Whats-App-Image-2026-10-29-at-1-52-36-PM.jpg',  caption:'Brothers by heart, friends by choice. ♥' },
+    { src:'https://i.postimg.cc/8C8wm2cc/Whats-App-Image-2026-10-29-at-1-52-12-PM.jpg',  caption:'Brothers by heart, friends by choice. ♥' },
   ],
 
   /* ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
@@ -716,6 +744,23 @@ const CONFIG = {
   specialVideo: {
     src:    'https://videotourl.com/videos/1793297333698-be28ad20-cf47-42e5-8b22-88aa6f843922.mp4',
     poster: ''
+  },
+
+  /* ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+     BACKGROUND VIDEO — ওয়েবসাইটের পেছনে যে ভিডিও চলবে 🎬
+     ▶ নিচের src এর জায়গায় আপনার ভিডিওর সরাসরি লিংক পেস্ট করুন:
+        • Direct video হলে : https://your-site.com/my-video.mp4
+     ▶ src খালি ('') রাখলে ভিডিও বন্ধ থাকবে — আগের মতো তারা-পাপড়ির ব্যাকগ্রাউন্ড দেখাবে
+     ▶ dim = ভিডিওর উপরে কতটা অন্ধকার পর্দা থাকবে (০ থেকে ১; বড় সংখ্যা = বেশি অন্ধকার,
+       যাতে উপরের লেখাগুলো সহজে পড়া যায় — ভিডিও বেশি উজ্জ্বল হলে এটা বাড়ান)
+     ▶ poster = ভিডিও লোড হওয়ার আগে যে ছবি দেখাবে (ঐচ্ছিক, খালি রাখলেও চলবে)
+     ▶ এখন ভিডিওর নিজের শব্দও বাজবে — envelope খোলার সাথে সাথেই শব্দ চালু হবে,
+       আর ডান-উপরের 🎵 বাটনে চাপ দিলে শব্দ বন্ধ/চালু হবে
+     ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ */
+  backgroundVideo: {
+    src:    'https://videotourl.com/videos/1793330112371-19f885b2-3d3d-44d5-89b3-6f4b5a39c60d.mp4',
+    poster: '',
+    dim:    0.72
   }
 };
 
@@ -733,6 +778,29 @@ document.querySelectorAll('[data-fill]').forEach(n => {
 });
 el('mainPhoto').src = CONFIG.mainPhoto;
 history.scrollRestoration = 'manual'; scrollTo(0,0);
+
+/* ═══════════ BACKGROUND VIDEO — সাইটের পেছনে চলতে থাকা ভিডিও ═══════════ */
+(function(){
+  const wrap = el('bgVideoWrap'), v = el('bgVideo');
+  const BV = CONFIG.backgroundVideo || {};
+  const src = (BV.src || '').trim();
+  if(!src){ wrap.remove(); return; }   /* লিংক না দিলে আগের মতো ব্যাকগ্রাউন্ড */
+  const veil = wrap.querySelector('.veil');
+  if(typeof BV.dim === 'number') veil.style.opacity = Math.max(0, Math.min(1, BV.dim));
+  if(BV.poster) v.poster = BV.poster;
+  v.src = src;
+  const show = () => wrap.classList.add('on');
+  v.addEventListener('loadeddata', show, {once:true});
+  v.addEventListener('error', () => wrap.remove(), {once:true});  /* লিংক না চললে আগের ব্যাকগ্রাউন্ডে ফিরে যাবে */
+  const tryPlay = () => v.play().catch(()=>{});
+  if(!REDUCED) tryPlay();
+  /* কিছু ব্রাউজার প্রথম টাচের আগে ভিডিও চালাতে দেয় না — এক টাচ করলেই চালু হয়ে যাবে */
+  addEventListener('pointerdown', () => { if(v.paused) tryPlay(); }, {passive:true});
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden){ v.pause(); }
+    else if(!REDUCED){ tryPlay(); }
+  });
+})();
 
 /* ═══════════ SKY — petals, stars & hearts ═══════════ */
 const sky = (() => {
@@ -871,81 +939,23 @@ const sky = (() => {
 document.addEventListener('pointerdown', e => {
   if(e.target.closest('button, a, .envelope, #lightbox')) return;
   sky.burst(e.clientX, e.clientY, 6);
-  if(AC && musicOn) noteF([587.33,659.25,739.99,880,987.77][Math.random()*5|0], AC.currentTime, .04, 1.4);
 });
 
-/* ═══════════ MUSIC BOX — a tiny generative lullaby ═══════════ */
-let AC = null, master = null, space = null, musicOn = true;
-const STEP = .55;
-const PART_A = [739.99,880,987.77,880, 739.99,659.25,587.33,0, 659.25,739.99,880,739.99, 659.25,587.33,0,0];
-const PART_B = [880,987.77,1174.66,987.77, 880,739.99,659.25,0, 739.99,880,987.77,880, 739.99,587.33,0,0];
-const BASS   = {0:146.83, 8:123.47, 16:98.0, 24:110.0};
-
-function noteF(f, t, v = .06, d = 2, bell = true){
-  if(!AC) return;
-  const o = AC.createOscillator(), g = AC.createGain();
-  o.type = 'sine'; o.frequency.value = f;
-  o.connect(g); g.connect(master); if(bell) g.connect(space);
-  g.gain.setValueAtTime(0, t);
-  g.gain.linearRampToValueAtTime(v, t + .015);
-  g.gain.exponentialRampToValueAtTime(.0004, t + d);
-  o.start(t); o.stop(t + d + .1);
-  if(bell){
-    const o2 = AC.createOscillator(), g2 = AC.createGain();
-    o2.type = 'triangle'; o2.frequency.value = f*2;
-    o2.connect(g2); g2.connect(master);
-    g2.gain.setValueAtTime(0, t);
-    g2.gain.linearRampToValueAtTime(v*.28, t + .01);
-    g2.gain.exponentialRampToValueAtTime(.0003, t + d*.7);
-    o2.start(t); o2.stop(t + d);
-  }
+/* ═══════════ BACKGROUND SOUND — পেছনের ভিডিওর নিজের শব্দ ═══════════ */
+let musicOn = true;
+function bgSound(on){
+  const v = el('bgVideo');
+  if(!v) return;
+  v.muted = !on;
+  if(on && v.paused && !REDUCED) v.play().catch(()=>{});
 }
-function padChord(){
-  [146.83, 220, 369.99].forEach((f,i) => {
-    const o = AC.createOscillator(), g = AC.createGain();
-    o.type = 'sine'; o.frequency.value = f * (i ? 1.0008 : 1);
-    o.connect(g); g.connect(master);
-    const t = AC.currentTime;
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(.013, t + 4);
-    g.gain.linearRampToValueAtTime(0, t + 18);
-    o.start(t); o.stop(t + 18.5);
-  });
-}
-function initAudio(){
-  if(AC) { if(AC.state === 'suspended') AC.resume(); return; }
-  try{
-    AC = new (window.AudioContext || window.webkitAudioContext)();
-    master = AC.createGain(); master.gain.value = 0; master.connect(AC.destination);
-    space = AC.createDelay(1); space.delayTime.value = .34;
-    const fb = AC.createGain(); fb.gain.value = .34;
-    const wet = AC.createGain(); wet.gain.value = .3;
-    space.connect(fb); fb.connect(space); space.connect(wet); wet.connect(master);
-    master.gain.linearRampToValueAtTime(musicOn ? .9 : .0001, AC.currentTime + 2.5);
-
-    let nextT = AC.currentTime + .25, stepN = 0;
-    setInterval(() => {
-      if(!musicOn) return;
-      const ahead = AC.currentTime + .8;
-      while(nextT < ahead){
-        const seq = (stepN % 32) < 16 ? PART_A : PART_B;
-        const f = seq[stepN % 16];
-        if(f) noteF(f, nextT + (Math.random()-.5)*.012, .058 + Math.random()*.018, 2.2);
-        const b = BASS[stepN % 32];
-        if(b) noteF(b, nextT, .05, 3.2, false);
-        if(stepN % 32 === 0) padChord();
-        stepN++; nextT += STEP;
-      }
-    }, 180);
-  }catch(e){ /* audio unavailable — the letter still speaks */ }
-}
+/* ব্রাউজারের নিয়ম: শব্দসহ প্লে করাতে হলে ইউজারের একটা টাচ লাগে —
+   তাই envelope খোলার সাথে সাথেই ভিডিওর শব্দ চালু হয়ে যাবে */
+function startBgSound(){ if(musicOn) bgSound(true); }
 el('soundToggle').addEventListener('click', () => {
   musicOn = !musicOn;
   el('soundToggle').classList.toggle('muted', !musicOn);
-  if(AC){
-    master.gain.cancelScheduledValues(AC.currentTime);
-    master.gain.linearRampToValueAtTime(musicOn ? .9 : .0001, AC.currentTime + .6);
-  }
+  bgSound(musicOn);
 });
 
 /* ═══════════ THE ENVELOPE ═══════════ */
@@ -953,7 +963,7 @@ const scene = el('envelopeScene'), envelope = el('envelope');
 let opened = false;
 function openEnvelope(){
   if(opened) return; opened = true;
-  initAudio();
+  startBgSound();
   const seal = el('seal');
   seal.classList.add('broken');
   const r = seal.getBoundingClientRect();
@@ -1049,7 +1059,6 @@ async function startLetter(){
   el('signature').classList.add('show');
   el('stamp').classList.add('show');
   el('scrollCue').classList.add('show');
-  if(AC && musicOn) noteF(1046.5, AC.currentTime, .045, 1.8);
 }
 el('paper').addEventListener('click', () => { if(letterStarted && !typingDone) skipType = true; });
 
@@ -1123,20 +1132,16 @@ function openVideo(){
   renderVideo();
   videoModal.classList.add('open');
   document.body.classList.add('locked');
-  /* soften the music box while the film plays */
-  if(AC && master && musicOn){
-    master.gain.cancelScheduledValues(AC.currentTime);
-    master.gain.linearRampToValueAtTime(.16, AC.currentTime + .9);
-  }
+  /* ব্যাকগ্রাউন্ড ভিডিও একটু থামিয়ে দেই — দুটো ভিডিও একসাথে চলবে না */
+  const bgv = el('bgVideo');
+  if(bgv && !bgv.paused) bgv.pause();
 }
 function closeVideo(){
   videoModal.classList.remove('open');
   document.body.classList.remove('locked');
   vmPlayer.innerHTML = ''; /* stops the video instantly */
-  if(AC && master && musicOn){
-    master.gain.cancelScheduledValues(AC.currentTime);
-    master.gain.linearRampToValueAtTime(.9, AC.currentTime + .9);
-  }
+  const bgv = el('bgVideo');
+  if(bgv && bgv.src && !REDUCED) bgv.play().catch(()=>{});  /* ব্যাকগ্রাউন্ড ভিডিও আবার চালু */
 }
 el('videoOpen').addEventListener('click', openVideo);
 el('vmClose').addEventListener('click', closeVideo);
